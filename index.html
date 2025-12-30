@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EASM Web UI MVP</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">EASM</div>
+          <div class="brand-title">Web UI MVP</div>
+        </div>
+        <nav class="nav">
+          <button class="nav-link is-active" data-page="org-scan" type="button">Organisation scan</button>
+          <button class="nav-link" data-page="preset-creator" type="button">Preset creator</button>
+          <button class="nav-link" data-page="custom-scan" type="button">Custom scan</button>
+        </nav>
+        <div class="topbar-meta">
+          <div class="meta-label">Session</div>
+          <div class="meta-value" id="sessionTime">--</div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="page-section is-active" id="page-org-scan">
+          <div class="section-title">
+            <div>
+              <h1>Organisation scan</h1>
+              <p>Pick an organisation, shape assets, select a preset, and generate the BBOT command.</p>
+            </div>
+	          </div>
+
+		          <div class="wizard" id="orgWizard">
+		            <aside class="wizard-sidebar card">
+		              <div class="wizard-sidebar-title">Sections</div>
+		              <ol class="wizard-steps" id="wizardSteps"></ol>
+		              <div class="wizard-actions wizard-actions--sidebar">
+		                <button class="ghost" id="wizardBackBtn" type="button">Back</button>
+		                <button class="ghost" id="wizardNextBtn" type="button">Next</button>
+		              </div>
+		            </aside>
+
+		            <div class="wizard-content">
+		              <div class="wizard-step" id="wizard-scan-name" data-wizard-step="scan-name">
+		                <section class="card" style="--delay: 0.05s;">
+		                  <div class="card-header">
+		                    <h2>Scan name</h2>
+		                    <div class="status-pill subtle">Auto fills when empty</div>
+		                  </div>
+	                  <div class="field">
+	                    <label for="scanNameInput">Scan name</label>
+	                    <input id="scanNameInput" type="text" placeholder="OrgName-passive-2025-12-25" />
+	                    <div class="field-hint" id="scanNameHint">Auto: --</div>
+	                  </div>
+	                </section>
+	              </div>
+
+		              <div class="wizard-step" id="wizard-organisation" data-wizard-step="organisation">
+		                <section class="card" style="--delay: 0.1s;">
+		                  <div class="card-header">
+		                    <h2>Organisation</h2>
+		                    <div class="status-pill" id="syncStatus">Last sync: --</div>
+		                  </div>
+	                  <div class="field">
+	                    <label for="orgDropdownTrigger">Organisation</label>
+	                    <div class="dropdown" data-dropdown="org">
+	                      <button class="dropdown-trigger" id="orgDropdownTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+	                        <span id="orgSelectedLabel">All organisations</span>
+	                        <span class="caret">v</span>
+	                      </button>
+	                      <div class="dropdown-panel" role="listbox">
+	                        <input class="dropdown-search" id="orgDropdownSearch" type="text" placeholder="Search organisation" />
+	                        <div class="dropdown-options" id="orgDropdownOptions"></div>
+	                      </div>
+	                    </div>
+	                  </div>
+	                  <div class="org-actions">
+	                    <button class="primary" id="syncBtn" type="button">Sync assets</button>
+	                    <div class="sync-state" id="syncState">Ready</div>
+	                  </div>
+	                </section>
+	              </div>
+
+		              <div class="wizard-step" id="wizard-assets" data-wizard-step="assets">
+		                <section class="card" style="--delay: 0.15s;">
+		                  <div class="card-header">
+		                    <h2>Assets for scan</h2>
+		                    <div class="status-pill subtle" id="assetCount">0 assets</div>
+		                  </div>
+            <div class="asset-controls">
+              <div class="field">
+                <label for="assetSearch">Search assets</label>
+                <input id="assetSearch" type="text" placeholder="Search value or organisation" />
+              </div>
+              <div class="field">
+                <label for="assetTypeDropdownTrigger">Type</label>
+                <div class="dropdown" data-dropdown="asset-type">
+                  <button class="dropdown-trigger" id="assetTypeDropdownTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="assetTypeSelectedLabel">All types</span>
+                    <span class="caret">v</span>
+                  </button>
+                  <div class="dropdown-panel" role="listbox">
+                    <input class="dropdown-search" id="assetTypeDropdownSearch" type="text" placeholder="Search types" />
+                    <div class="dropdown-options" id="assetTypeDropdownOptions"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="assetSelectionFilter">Selection filter</label>
+                <select id="assetSelectionFilter">
+                  <option value="all">All</option>
+                  <option value="selected">Selected only</option>
+                  <option value="unselected">Unselected only</option>
+                </select>
+              </div>
+            </div>
+                  <div class="asset-inputs">
+                    <div class="field">
+                      <label for="manualAssets">Add assets manually</label>
+                      <textarea id="manualAssets" rows="4" placeholder="One asset per line"></textarea>
+	                      <button class="ghost" id="addAssetsBtn" type="button">Add assets</button>
+	                    </div>
+	                    <div class="field">
+	                      <label for="assetFileInput">Import from file (.txt or .csv)</label>
+                      <input id="assetFileInput" type="file" accept=".txt,.csv" />
+                      <button class="ghost" id="importBtn" type="button">Import</button>
+                      <div class="field-hint" id="importStatus">No import yet</div>
+                    </div>
+                  </div>
+                  <div class="table-wrap">
+                    <table class="asset-table" id="assetsTable">
+                      <thead>
+                        <tr>
+                          <th class="col-selected">
+                            <input id="assetsMasterCheckbox" type="checkbox" aria-label="Toggle all visible assets" />
+                          </th>
+                          <th>Type</th>
+                          <th>Value</th>
+                          <th>Source</th>
+                          <th class="col-org">Organisation</th>
+	                        </tr>
+	                      </thead>
+	                      <tbody id="assetsBody"></tbody>
+	                    </table>
+	                  </div>
+	                </section>
+	              </div>
+
+		              <div class="wizard-step" id="wizard-preset" data-wizard-step="preset">
+		                <div class="grid two-col">
+		                  <section class="card" style="--delay: 0.2s;">
+		                    <div class="card-header">
+		                      <h2>Preset</h2>
+		                      <div class="status-pill subtle" id="moduleCount">0 modules</div>
+	                    </div>
+	                    <div class="field">
+	                      <label for="presetDropdownTrigger">Preset</label>
+	                      <div class="dropdown" data-dropdown="preset">
+	                        <button class="dropdown-trigger" id="presetDropdownTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+	                          <span id="presetSelectedLabel">--</span>
+	                          <span class="caret">v</span>
+	                        </button>
+	                        <div class="dropdown-panel" role="listbox">
+	                          <input class="dropdown-search" id="presetDropdownSearch" type="text" placeholder="Search preset" />
+	                          <div class="dropdown-options" id="presetDropdownOptions"></div>
+	                        </div>
+	                      </div>
+	                    </div>
+	                    <div class="preset-docs" id="presetDocs" aria-live="polite"></div>
+	                    <div class="module-list" id="moduleList"></div>
+	                  </section>
+
+	                  <section class="card" style="--delay: 0.25s;">
+	                    <div class="card-header">
+	                      <h2>Preset config preview</h2>
+	                      <div class="status-pill subtle">Read only</div>
+	                    </div>
+	                    <pre class="code-block"><code id="presetYaml"></code></pre>
+	                    <div class="save-preset" id="savePresetPrompt" hidden>
+	                      <div class="save-preset-title">Changes detected</div>
+	                      <div class="save-preset-subtitle">Save this as a custom preset (does not modify the original).</div>
+	                      <div class="save-preset-actions">
+	                        <input id="customPresetNameInput" type="text" placeholder="custom_preset_name" />
+	                        <button class="primary" id="saveCustomPresetBtn" type="button">Save preset</button>
+	                      </div>
+	                      <div class="field-hint" id="saveCustomPresetStatus"></div>
+	                    </div>
+	                  </section>
+	                </div>
+	              </div>
+
+		              <div class="wizard-step" id="wizard-bbot" data-wizard-step="bbot">
+		                <div class="grid two-col paired-grid">
+		                  <section class="card" style="--delay: 0.3s;">
+		                    <div class="card-header">
+		                      <h2>BBOT command</h2>
+	                      <div class="command-meta">
+	                        <span class="mode-badge" id="commandModeBadge">Auto</span>
+	                        <button class="ghost" id="regenerateBtn" type="button">Regenerate</button>
+	                        <button class="ghost" id="validateBtn" type="button">Validate command</button>
+	                      </div>
+	                    </div>
+	                    <textarea class="command-input" id="commandInput" rows="5" spellcheck="false"></textarea>
+	                    <div class="field-hint" id="commandHint">Auto updates from assets and preset until you edit manually.</div>
+	                    <div class="field-hint" id="validationStatus">Validation not run</div>
+	                  </section>
+
+	                  <section class="card" style="--delay: 0.35s;">
+	                    <div class="card-header">
+	                      <h2>Help</h2>
+	                      <div class="status-pill subtle">bbot --help (mock)</div>
+	                    </div>
+	                    <div class="help-panel">
+	<pre>bbot --help
+
+Usage:
+  bbot [options]
+
+Options:
+  -n, --name &lt;name&gt;        Scan name
+  -t, --targets &lt;list&gt;     Comma separated assets
+  -p, --preset &lt;name&gt;      Preset name
+  --modules &lt;list&gt;         Enabled modules
+  --config &lt;file&gt;          Config path
+  --dry-run                Print command only
+  --verbose                Extra output
+
+Examples:
+  bbot -n "cip" -t "192.168.1.1" -p "passive_scan" --modules "osint"</pre>
+	                    </div>
+	                  </section>
+	                </div>
+	              </div>
+
+		              <div class="wizard-step" id="wizard-summary" data-wizard-step="summary">
+		                <section class="card summary" style="--delay: 0.4s;">
+		                  <div class="card-header">
+		                    <h2>Summary</h2>
+		                    <div class="status-pill accent" id="summaryMode">Auto</div>
+		                  </div>
+	                  <div class="summary-grid">
+	                    <div>
+	                      <div class="summary-label">Scan name</div>
+	                      <div class="summary-value" id="summaryScanName">--</div>
+	                    </div>
+	                    <div>
+	                      <div class="summary-label">Organisation</div>
+	                      <div class="summary-value" id="summaryOrg">--</div>
+	                    </div>
+	                    <div>
+	                      <div class="summary-label">Assets selected</div>
+	                      <div class="summary-value" id="summaryAssets">--</div>
+	                    </div>
+	                    <div>
+	                      <div class="summary-label">Preset + modules</div>
+	                      <div class="summary-value" id="summaryModules">--</div>
+	                    </div>
+	                  </div>
+		                  <div class="summary-command">
+		                    <div class="summary-label">Current command</div>
+		                    <div class="summary-value mono" id="summaryCommand">--</div>
+		                  </div>
+		                  <div class="start-scan-row">
+		                    <button class="primary" id="startScanBtn" type="button">Start scan</button>
+		                    <div class="status-pill subtle" id="startScanStatus">Not started</div>
+		                  </div>
+		                </section>
+		              </div>
+		            </div>
+		          </div>
+		        </section>
+
+        <section class="page-section" id="page-preset-creator">
+          <section class="card placeholder">
+            <h1>Preset creator</h1>
+            <p>Coming soon.</p>
+          </section>
+        </section>
+
+        <section class="page-section" id="page-custom-scan">
+          <section class="card placeholder">
+            <h1>Custom scan</h1>
+            <p>Coming soon.</p>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="mock-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
