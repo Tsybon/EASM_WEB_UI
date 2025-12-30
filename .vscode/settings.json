@@ -1,7 +1,0 @@
-{
-    "chat.mcp.serverSampling": {
-        "gpt_v2/.vscode/mcp.json: io.github.upstash/context7": {
-            "allowedModels": []
-        }
-    }
-}
