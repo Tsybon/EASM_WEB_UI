@@ -1886,12 +1886,19 @@ function updateScanNameHint() {
 }
 
 function getDefaultScanName() {
-  const orgLabel = isAllOrganisationsSelected() || state.selectedOrgIds.size !== 1 ? "all" : Array.from(state.selectedOrgIds)[0];
+  const selected = Array.from(state.selectedOrgIds);
+  const scopeLabel = isAllOrganisationsSelected()
+    ? "all"
+    : selected.length === 1
+      ? selected[0]
+      : selected.length > 1
+        ? "multi"
+        : "none";
   const date = new Date();
   const ymd = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
     date.getDate()
   ).padStart(2, "0")}`;
-  return `${orgLabel}-${state.selectedPreset}-${ymd}`;
+  return `${scopeLabel}-${state.selectedPreset}-${ymd}`;
 }
 
 function getEffectiveScanName() {
@@ -2087,7 +2094,7 @@ function isValidUrl(value) {
 function handleSyncAssets() {
   elements.syncBtn.disabled = true;
   state.sync.status = "in-progress";
-  elements.syncState.textContent = "Sync in progress...";
+  elements.syncState.textContent = "Syncing all organisations...";
 
   setTimeout(() => {
     const isSuccess = Math.random() > 0.2;
@@ -2112,7 +2119,7 @@ function addMockSyncAssets() {
   const count = Math.random() > 0.6 ? 2 : 1;
   for (let i = 0; i < count; i += 1) {
     const type = Math.random() > 0.5 ? "ip" : "domain";
-    const orgIds = state.selectedOrgIds.size ? Array.from(state.selectedOrgIds) : state.organisations.map((org) => org.id);
+    const orgIds = state.organisations.map((org) => org.id);
     const organisation = orgIds[Math.floor(Math.random() * orgIds.length)] || "all";
     const value = type === "ip" ? generateNextIp() : generateSyncDomain(organisation);
     addAsset({
