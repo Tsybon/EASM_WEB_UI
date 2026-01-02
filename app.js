@@ -1826,13 +1826,15 @@ function renderCustomScan() {
 }
 
 function generateBbotCommand() {
-  const orgName = isAllOrganisationsSelected() || state.selectedOrgIds.size !== 1 ? "all" : Array.from(state.selectedOrgIds)[0];
-  const assets = getSelectedAssetsForCommand().map((asset) => asset.value).join(",");
+  const scanName = getEffectiveScanName();
+  // Backend will write the selected assets into `targets.txt` in the scan workdir.
+  // The command should reference the file to avoid extremely long CLI arguments.
+  const targetsFile = "targets.txt";
   const presetName = state.selectedPreset;
   const preset = state.presets.find((item) => item.name === presetName);
   const enabledSet = getEnabledModules();
   const enabledModules = preset ? preset.modules.filter((module) => enabledSet.has(module)).join(",") : "";
-  return `bbot -n "${orgName}" -t "${assets}" -p "${presetName}" --modules "${enabledModules}"`;
+  return `bbot -n "${scanName}" -t ${targetsFile} -p "${presetName}" --modules "${enabledModules}"`;
 }
 
 function updateCommandIfAuto() {
@@ -1867,13 +1869,14 @@ function updateCommandModeUI() {
   elements.summaryMode.classList.toggle("accent", !isManual);
   elements.summaryMode.classList.toggle("subtle", isManual);
   elements.commandHint.textContent = isManual
-    ? "Manual mode: changes to assets and presets will not overwrite the command."
-    : "Auto updates from assets and preset until you edit manually.";
+    ? "Manual mode: changes to scan name and preset will not overwrite the command."
+    : "Auto updates from scan name and preset until you edit manually.";
 }
 
 function handleScanNameInput(event) {
   state.scanNameInput = event.target.value;
   updateScanNameHint();
+  updateCommandIfAuto();
   renderSummary();
 }
 

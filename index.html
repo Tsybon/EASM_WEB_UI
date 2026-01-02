@@ -204,7 +204,7 @@
 	                      </div>
 	                    </div>
 	                    <textarea class="command-input" id="commandInput" rows="5" spellcheck="false"></textarea>
-	                    <div class="field-hint" id="commandHint">Auto updates from assets and preset until you edit manually.</div>
+	                    <div class="field-hint" id="commandHint">Auto updates from scan name and preset until you edit manually.</div>
 	                    <div class="field-hint" id="validationStatus">Validation not run</div>
 	                  </section>
 
@@ -221,7 +221,7 @@ Usage:
 
 Options:
   -n, --name &lt;name&gt;        Scan name
-  -t, --targets &lt;list&gt;     Comma separated assets
+  -t, --targets &lt;file&gt;     Targets file (e.g., targets.txt)
   -p, --preset &lt;name&gt;      Preset name
   --modules &lt;list&gt;         Enabled modules
   --config &lt;file&gt;          Config path
@@ -229,7 +229,7 @@ Options:
   --verbose                Extra output
 
 Examples:
-  bbot -n "cip" -t "192.168.1.1" -p "passive_scan" --modules "osint"</pre>
+  bbot -n "cip" -t targets.txt -p "passive_scan" --modules "osint"</pre>
 	                    </div>
 	                  </section>
 	                </div>
